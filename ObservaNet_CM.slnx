@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ObservaNet.Agent/ObservaNet.Agent.csproj" />
+    <Project Path="src/ObservaNet.Api/ObservaNet.Api.csproj" />
+    <Project Path="src/ObservaNet.Shared/ObservaNet.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ObservaNet.Agent.Tests/ObservaNet.Agent.Tests.csproj" />
+    <Project Path="tests/ObservaNet.Api.Tests/ObservaNet.Api.Tests.csproj" />
+  </Folder>
+</Solution>
