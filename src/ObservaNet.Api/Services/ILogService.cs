@@ -7,5 +7,6 @@ namespace ObservaNet.Api.Services
     {
         Task IngestLogAsync(LogIngestRequest request);
         Task<LogQueryResponse> QueryLogsAsync(string? serviceName, ObservaLogLevel? level, DateTimeOffset? from, DateTimeOffset? to, int page, int pageSize);
+        Task<LogMetrics> GetMetricsAsync();
     }
 }

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { LogEntry, LogQueryResponse } from '../types/log';
+import type { LogEntry, LogMetrics, LogQueryResponse } from '../types/log';
 import { ObservaLogLevel } from '../types/log';
 
 const api = axios.create({
@@ -17,6 +17,11 @@ export async function fetchLogs(
   if (level !== undefined) params.level = level;
 
   const response = await api.get<LogQueryResponse>('/api/logs', { params });
+  return response.data;
+}
+
+export async function fetchMetrics(): Promise<LogMetrics> {
+  const response = await api.get<LogMetrics>('/api/logs/metrics');
   return response.data;
 }
 
