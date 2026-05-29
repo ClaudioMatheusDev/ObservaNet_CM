@@ -37,5 +37,10 @@ public class ObservaNetDbContext : DbContext
                 v => v.UtcTicks,
                 v => new DateTimeOffset(v, TimeSpan.Zero)
             );
+
+        // Índices para consultas frequentes
+        modelBuilder.Entity<LogEntry>().HasIndex(e => e.Timestamp);
+        modelBuilder.Entity<LogEntry>().HasIndex(e => e.Level);
+        modelBuilder.Entity<LogEntry>().HasIndex(e => e.ServiceName);
     }
 }

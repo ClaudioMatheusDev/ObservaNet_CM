@@ -3,7 +3,7 @@ import type { LogEntry, LogMetrics, LogQueryResponse } from '../types/log';
 import { ObservaLogLevel } from '../types/log';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5033',
+  baseURL: import.meta.env.VITE_API_URL ?? '',
 });
 
 export async function fetchLogs(

@@ -6,6 +6,7 @@ namespace ObservaNet.Api.Services
     public class InMemoryLogService : ILogService
     {
         private readonly List<LogEntry> _logs = [];
+        private readonly object _lock = new();
 
         public Task IngestLogAsync(LogIngestRequest request)
         {
@@ -20,13 +21,15 @@ namespace ObservaNet.Api.Services
                 Timestamp = DateTimeOffset.UtcNow
             };
 
-            _logs.Add(logEntry);
+            lock (_lock) { _logs.Add(logEntry); }
             return Task.CompletedTask;
         }
 
         public Task<LogQueryResponse> QueryLogsAsync(string? serviceName, ObservaLogLevel? level, DateTimeOffset? from, DateTimeOffset? to, int page, int pageSize)
         {
-            var query = _logs.AsQueryable();
+            List<LogEntry> snapshot;
+            lock (_lock) { snapshot = [.. _logs]; }
+            var query = snapshot.AsQueryable();
 
             if (!string.IsNullOrEmpty(serviceName))
             {
@@ -62,16 +65,18 @@ namespace ObservaNet.Api.Services
 
         public Task<LogMetrics> GetMetricsAsync()
         {
-            var byLevel = _logs
+            List<LogEntry> snapshot;
+            lock (_lock) { snapshot = [.. _logs]; }
+            var byLevel = snapshot
                 .GroupBy(l => l.Level.ToString())
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            var byService = _logs
+            var byService = snapshot
                 .GroupBy(l => l.ServiceName)
                 .ToDictionary(g => g.Key, g => g.Count());
 
             var todayStart = new DateTimeOffset(DateTimeOffset.UtcNow.Date, TimeSpan.Zero);
-            var totalToday = _logs.Count(l => l.Timestamp >= todayStart);
+            var totalToday = snapshot.Count(l => l.Timestamp >= todayStart);
 
             return Task.FromResult(new LogMetrics
             {

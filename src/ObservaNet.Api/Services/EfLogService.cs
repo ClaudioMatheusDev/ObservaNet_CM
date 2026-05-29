@@ -34,10 +34,13 @@ public class EfLogService : ILogService
         DateTimeOffset? from, DateTimeOffset? to,
         int page, int pageSize)
     {
-        var query = _context.Logs.AsQueryable();
+        var query = _context.Logs.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrEmpty(serviceName))
-            query = query.Where(l => l.ServiceName.ToLower() == serviceName.ToLower());
+        {
+            var lowerName = serviceName.ToLower();
+            query = query.Where(l => l.ServiceName.ToLower() == lowerName);
+        }
 
         if (level.HasValue)
             query = query.Where(l => l.Level == level.Value);
@@ -67,17 +70,19 @@ public class EfLogService : ILogService
     public async Task<LogMetrics> GetMetricsAsync()
     {
         var levelGroups = await _context.Logs
+            .AsNoTracking()
             .GroupBy(l => l.Level)
             .Select(g => new { Level = g.Key, Count = g.Count() })
             .ToListAsync();
 
         var serviceGroups = await _context.Logs
+            .AsNoTracking()
             .GroupBy(l => l.ServiceName)
             .Select(g => new { Service = g.Key, Count = g.Count() })
             .ToListAsync();
 
         var todayStart = new DateTimeOffset(DateTimeOffset.UtcNow.Date, TimeSpan.Zero);
-        var totalToday = await _context.Logs.CountAsync(l => l.Timestamp >= todayStart);
+        var totalToday = await _context.Logs.AsNoTracking().CountAsync(l => l.Timestamp >= todayStart);
 
         return new LogMetrics
         {

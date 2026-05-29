@@ -19,8 +19,9 @@ namespace ObservaNet.Api.Endpoints
                 return Results.Created("/api/logs", null);
             });
 
-            app.MapGet("/api/logs", async (string? serviceName, ObservaLogLevel? level, DateTimeOffset? from, DateTimeOffset? to, int page, int pageSize, ILogService logService) =>
+            app.MapGet("/api/logs", async (ILogService logService, string? serviceName, ObservaLogLevel? level, DateTimeOffset? from, DateTimeOffset? to, int page = 1, int pageSize = 20) =>
             {
+                pageSize = Math.Clamp(pageSize, 1, 100);
                 var result = await logService.QueryLogsAsync(serviceName, level, from, to, page, pageSize);
                 return Results.Ok(result);
             });
