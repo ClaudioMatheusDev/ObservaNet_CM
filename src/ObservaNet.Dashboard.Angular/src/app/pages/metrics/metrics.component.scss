@@ -1,0 +1,34 @@
+$bg:      #0f1117;
+$surface: #161b27;
+$border:  #1e2535;
+$text:    #e2e8f0;
+$muted:   #4a5568;
+$green:   #34d399;
+$red:     #f87171;
+$yellow:  #fbbf24;
+$blue:    #60a5fa;
+
+.loading { font-family: 'IBM Plex Mono', monospace; padding: 32px; background: $bg; min-height: 100vh; color: $muted; }
+
+.page { font-family: 'IBM Plex Mono', monospace; background: $bg; min-height: 100vh; padding: 32px 28px; color: $text; }
+
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 0.5px solid $border; }
+.eyebrow { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: $muted; display: block; }
+.title   { font-size: 20px; font-weight: 500; color: #f1f5f9; margin: 0; }
+.badge   { font-size: 11px; color: $green; background: rgba($green,.1); border: 0.5px solid rgba($green,.2); padding: 4px 12px; border-radius: 20px; }
+
+.error-box { background: rgba(220,38,38,.1); border: 0.5px solid rgba(220,38,38,.3); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: $red; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 36px; }
+.kpi-card { background: $surface; border: 0.5px solid $border; border-radius: 10px; padding: 16px 18px; }
+.kpi-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: $muted; margin-bottom: 8px; }
+.kpi-value { font-size: 30px; font-weight: 500; line-height: 1; color: $blue; &.error { color: $red; } &.warning { color: $yellow; } }
+
+.section { margin-bottom: 32px; }
+.section-label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: $muted; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 0.5px solid $border; }
+
+.bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 9px; }
+.bar-name  { font-size: 12px; color: #94a3b8; width: 120px; text-align: right; flex-shrink: 0; }
+.bar-track { flex: 1; height: 7px; background: $border; border-radius: 2px; overflow: hidden; }
+.bar-fill  { height: 100%; background: $red; border-radius: 2px; transition: width .3s; &.service { background: $blue; } }
+.bar-count { font-size: 12px; color: $muted; width: 40px; text-align: right; flex-shrink: 0; }

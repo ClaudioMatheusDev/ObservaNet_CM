@@ -1,0 +1,77 @@
+services:
+
+  # ─── Elasticsearch ────────────────────────────────────────────────────────────
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    container_name: observanet-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - cluster.name=observanet-cluster
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health | grep -qv '\"status\":\"red\"'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+
+  # ─── Kibana ───────────────────────────────────────────────────────────────────
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.0
+    container_name: observanet-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  # ─── API (.NET) ───────────────────────────────────────────────────────────────
+  observanet-api:
+    build:
+      context: ../..
+      dockerfile: src/ObservaNet.Api/Dockerfile
+    container_name: observanet-api
+    ports:
+      - "5033:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - Elasticsearch__Uri=http://elasticsearch:9200
+      - AllowedOrigins__0=http://localhost:5173
+      - AllowedOrigins__1=http://localhost:4200
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  # ─── Dashboard React ──────────────────────────────────────────────────────────
+  observanet-dashboard:
+    build:
+      context: ../../src/ObservaNet.Dashboard
+      dockerfile: Dockerfile
+    container_name: observanet-dashboard
+    ports:
+      - "5173:80"
+    depends_on:
+      - observanet-api
+
+  # ─── Dashboard Angular ────────────────────────────────────────────────────────
+  observanet-dashboard-angular:
+    build:
+      context: ../../src/ObservaNet.Dashboard.Angular
+      dockerfile: Dockerfile
+    container_name: observanet-dashboard-angular
+    ports:
+      - "4200:80"
+    depends_on:
+      - observanet-api
+
+volumes:
+  esdata:
+    driver: local
