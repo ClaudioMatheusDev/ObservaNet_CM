@@ -59,5 +59,26 @@ namespace ObservaNet.Api.Services
                 PageSize = pageSize
             });
         }
+
+        public Task<LogMetrics> GetMetricsAsync()
+        {
+            var byLevel = _logs
+                .GroupBy(l => l.Level.ToString())
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var byService = _logs
+                .GroupBy(l => l.ServiceName)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var todayStart = new DateTimeOffset(DateTimeOffset.UtcNow.Date, TimeSpan.Zero);
+            var totalToday = _logs.Count(l => l.Timestamp >= todayStart);
+
+            return Task.FromResult(new LogMetrics
+            {
+                ByLevel = byLevel,
+                ByService = byService,
+                TotalToday = totalToday
+            });
+        }
     }
 }

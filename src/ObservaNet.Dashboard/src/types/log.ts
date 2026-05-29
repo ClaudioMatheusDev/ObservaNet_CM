@@ -23,3 +23,9 @@ export interface LogQueryResponse {
   page: number;
   pageSize: number;
 }
+
+export interface LogMetrics {
+  byLevel: Record<string, number>;
+  byService: Record<string, number>;
+  totalToday: number;
+}
