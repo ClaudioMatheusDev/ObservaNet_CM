@@ -1,6 +1,9 @@
+using Elastic.Clients.Elasticsearch;
 using Microsoft.EntityFrameworkCore;
+using ObservaNet.Api.Alerting;
 using ObservaNet.Api.Data;
 using ObservaNet.Api.Endpoints;
+using ObservaNet.Api.Middleware;
 using ObservaNet.Api.Services;
 using Serilog;
 
@@ -27,18 +30,29 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddDbContext<ObservaNetDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("Default") ?? "Data Source=observanet.db"));
-
-builder.Services.AddScoped<ILogService, EfLogService>();
+var esUri = builder.Configuration["Elasticsearch:Uri"];
+if (!string.IsNullOrEmpty(esUri))
+{
+    var esSettings = new ElasticsearchClientSettings(new Uri(esUri));
+    builder.Services.AddSingleton(new ElasticsearchClient(esSettings));
+    builder.Services.AddScoped<ILogService, ElasticsearchLogService>();
+}
+else
+{
+    builder.Services.AddDbContext<ObservaNetDbContext>(options =>
+        options.UseSqlite(
+            builder.Configuration.GetConnectionString("Default") ?? "Data Source=observanet.db"));
+    builder.Services.AddScoped<ILogService, EfLogService>();
+}
 
 builder.Services.AddHealthChecks();
+builder.Services.AddScoped<AlertService>();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (string.IsNullOrEmpty(app.Configuration["Elasticsearch:Uri"]))
 {
+    using var scope = app.Services.CreateScope();
     scope.ServiceProvider.GetRequiredService<ObservaNetDbContext>().Database.EnsureCreated();
 }
 
@@ -48,11 +62,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+app.UsePerformanceTracking();
 
 if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 
 app.MapLogEndpoints();
+app.MapAlertEndpoints();
 app.MapHealthChecks("/health");
 
 try

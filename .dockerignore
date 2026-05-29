@@ -1,0 +1,24 @@
+# Artefatos de build
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/TestResults/
+
+# Git e IDE
+.git/
+.gitignore
+.vs/
+**/*.user
+**/*.suo
+
+# Arquivos não necessários para o build da imagem
+docs/
+tests/
+deploy/
+infrastructure/
+*.md
+.github/
+
+# Configurações de desenvolvimento
+**/appsettings.Development.json

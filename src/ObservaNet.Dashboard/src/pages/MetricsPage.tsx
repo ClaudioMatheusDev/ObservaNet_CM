@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { LogMetrics } from '../types/log';
-import { fetchMetrics } from '../services/logService';
+import { fetchMetrics } from '../services/LogService';
 
 const LEVEL_COLORS: Record<string, { bar: string; badge: string; text: string }> = {
   Critical: { bar: '#be185d', badge: '#fdf2f8', text: '#9d174d' },
