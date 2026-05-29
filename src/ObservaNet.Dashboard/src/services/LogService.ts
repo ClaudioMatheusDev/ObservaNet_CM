@@ -1,36 +1,26 @@
-import axios, { AxiosInstance } from 'axios';
+import axios from 'axios';
+import type { LogEntry, LogQueryResponse } from '../types/log';
+import { ObservaLogLevel } from '../types/log';
 
-const api: AxiosInstance = axios.create({
+const api = axios.create({
   baseURL: 'http://localhost:5033',
 });
 
-export interface FetchLogsParams {
-  serviceName?: string;
-  level?: string;
-  page?: number;
-  pageSize?: number;
-}
-
 export async function fetchLogs(
   serviceName?: string,
-  level?: string,
+  level?: ObservaLogLevel,
   page = 1,
   pageSize = 20
-) {
-  const params: Record<string, any> = { page, pageSize };
+): Promise<LogQueryResponse> {
+  const params: Record<string, unknown> = { page, pageSize };
   if (serviceName) params.serviceName = serviceName;
-  if (level) params.level = level;
+  if (level !== undefined) params.level = level;
 
-  const response = await api.get('/api/logs', { params });
+  const response = await api.get<LogQueryResponse>('/api/logs', { params });
   return response.data;
 }
 
-export async function ingestLog(request: unknown) {
-  const response = await api.post('/api/logs', request);
+export async function ingestLog(request: Omit<LogEntry, 'id' | 'timestamp'>) {
+  const response = await api.post<void>('/api/logs', request);
   return response.data;
 }
-
-export default {
-  fetchLogs,
-  ingestLog,
-};

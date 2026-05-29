@@ -1,38 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ObservaLogLevel, type LogEntry } from '../types/log';
+import { fetchLogs as fetchLogsService } from '../services/logService';
 
-type ObservaLogLevel = '' | 'Trace' | 'Debug' | 'Information' | 'Warning' | 'Error' | 'Fatal';
-
-interface LogEntry {
-  timestamp: string; // ISO string
-  service: string;
-  level: ObservaLogLevel;
-  message: string;
-}
-
-export default function LogsPage(): JSX.Element {
+export default function LogsPage() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [serviceName, setServiceName] = useState<string>('');
-  const [level, setLevel] = useState<ObservaLogLevel>('');
+  const [serviceName, setServiceName] = useState('');
+  const [level, setLevel] = useState<ObservaLogLevel | ''>('');
 
-  async function fetchLogs(filters?: { service?: string; level?: string }) {
-    const params = new URLSearchParams();
-    if (filters?.service) params.append('serviceName', filters.service);
-    if (filters?.level) params.append('level', filters.level);
-
-    const res = await fetch(`/api/logs?${params.toString()}`);
-    if (!res.ok) {
-      console.error('Failed to fetch logs');
-      return;
-    }
-    const data = (await res.json()) as LogEntry[];
-    setLogs(data);
+  async function loadLogs() {
+    const data = await fetchLogsService(
+      serviceName.trim() || undefined,
+      level !== '' ? level : undefined
+    );
+    setLogs(data.logs);
   }
 
   useEffect(() => {
-    // load logs on mount
-    fetchLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    loadLogs();
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div style={{ padding: 16 }}>
@@ -47,17 +32,15 @@ export default function LogsPage(): JSX.Element {
 
         <select value={level} onChange={(e) => setLevel(e.target.value as ObservaLogLevel)}>
           <option value="">Todos os níveis</option>
-          <option value="Trace">Trace</option>
-          <option value="Debug">Debug</option>
-          <option value="Information">Information</option>
-          <option value="Warning">Warning</option>
-          <option value="Error">Error</option>
-          <option value="Fatal">Fatal</option>
+          <option value={ObservaLogLevel.Trace}>Trace</option>
+          <option value={ObservaLogLevel.Debug}>Debug</option>
+          <option value={ObservaLogLevel.Information}>Information</option>
+          <option value={ObservaLogLevel.Warning}>Warning</option>
+          <option value={ObservaLogLevel.Error}>Error</option>
+          <option value={ObservaLogLevel.Critical}>Critical</option>
         </select>
 
-        <button
-          onClick={() => fetchLogs({ service: serviceName.trim() || undefined, level: level || undefined })}
-        >
+        <button onClick={loadLogs}>
           Buscar
         </button>
       </div>
@@ -77,7 +60,7 @@ export default function LogsPage(): JSX.Element {
               <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
                 {new Date(l.timestamp).toLocaleString()}
               </td>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{l.service}</td>
+              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{l.serviceName}</td>
               <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{l.level}</td>
               <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{l.message}</td>
             </tr>
