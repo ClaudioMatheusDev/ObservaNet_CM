@@ -15,7 +15,7 @@ Painel de Observabilidade e Logs Centralizados para aplicações ASP.NET Core. P
 ## Stack Principal
 
 - **Backend:** ASP.NET Core, Serilog, ElasticSearch
-- **Frontend:**  React, Angular
+- **Frontend:**  React
 - **Logs & Dashboards:** Kibana/Grafana, ELK Stack
 - **DevOps:** Docker, docker-compose, [GitHub Actions / Azure DevOps]
 - **Infraestrutura:** [Terraform/Bicep/ARM para cloud (opcional)]
